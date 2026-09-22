@@ -1,10 +1,13 @@
 import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    'https://eakaagtmthajiuxpyipb.supabase.co';
+  const anonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-      'eyJhYmMiOiJkZWZhdWx0In0='
-  );
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    'sb_publishable_PoNRq9hXY1dikqy0i8HisA_qcwjlwtA';
+
+  return createBrowserClient(url, anonKey);
 }

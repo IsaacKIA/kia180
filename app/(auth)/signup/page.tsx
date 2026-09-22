@@ -16,15 +16,17 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -35,17 +37,22 @@ export default function SignupPage() {
       });
 
       if (error) {
-        if (process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true') {
-          router.push('/today');
-          return;
-        }
         setErrorMsg(error.message);
         return;
       }
 
+      if (data?.user && !data?.session) {
+        setSuccessMsg(
+          'Registration complete! If email confirmation is enabled on your Supabase project, check your email to verify your account, then log in.'
+        );
+        return;
+      }
+
       router.push('/today');
-    } catch {
-      router.push('/today');
+      router.refresh();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
@@ -67,6 +74,15 @@ export default function SignupPage() {
             <div className="flex items-center gap-2 p-2.5 rounded-md bg-red-950/40 border border-red-900/60 text-xs text-red-400">
               <ShieldAlert className="h-4 w-4 shrink-0" />
               <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="space-y-3 p-3 rounded-md bg-emerald-950/40 border border-emerald-800/60 text-xs text-emerald-300">
+              <p>{successMsg}</p>
+              <Link href="/login" className="inline-block text-[#C9A84C] underline font-medium">
+                Go to Log In &rarr;
+              </Link>
             </div>
           )}
 

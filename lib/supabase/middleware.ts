@@ -12,11 +12,13 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    'https://eakaagtmthajiuxpyipb.supabase.co';
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    'eyJhYmMiOiJkZWZhdWx0In0=';
+    'sb_publishable_PoNRq9hXY1dikqy0i8HisA_qcwjlwtA';
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

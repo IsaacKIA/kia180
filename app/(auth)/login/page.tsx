@@ -25,23 +25,19 @@ export default function LoginPage() {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password: password || 'temp_password',
+        password,
       });
 
       if (error) {
-        // In local development mode, allow instant entry
-        if (process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === 'true') {
-          router.push('/today');
-          return;
-        }
         setErrorMsg(error.message);
         return;
       }
 
       router.push('/today');
-    } catch {
-      // Fallback for dev mode
-      router.push('/today');
+      router.refresh();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
