@@ -256,7 +256,7 @@ export default function FinancePage() {
 
         {/* ── Income Log Tab ── */}
         <TabsContent value="income" className="mt-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[#F7F5F0]">Income Records</h3>
             <div className="flex items-center gap-2">
               <Button variant="secondary" size="sm" className="text-xs gap-1.5">

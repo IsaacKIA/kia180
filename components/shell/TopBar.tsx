@@ -2,16 +2,26 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Menu } from 'lucide-react';
 import { QuickCapture } from './QuickCapture';
 import { NotificationBell } from './NotificationBell';
+import { openMobileDrawer } from './MobileDrawer';
 import { Button } from '@/components/ui/button';
 
 export function TopBar() {
   return (
-    <header className="h-14 border-b border-[#1F1F2B] bg-[#0E0E13]/90 backdrop-blur-md sticky top-0 z-20 px-4 sm:px-6 flex items-center justify-between">
-      {/* Left: Cycle & Phase status */}
-      <div className="flex items-center gap-3">
+    <header className="h-14 border-b border-[#1F1F2B] bg-[#0E0E13]/90 backdrop-blur-md sticky top-0 z-20 px-3 sm:px-6 flex items-center justify-between">
+      {/* Left: Hamburger (mobile) + Cycle & Phase status */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={() => openMobileDrawer()}
+          className="lg:hidden p-1.5 -ml-1 text-[#A3A099] hover:text-[#F7F5F0] hover:bg-[#181822] rounded-lg transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
         <div className="flex items-center gap-2">
           <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
           <span className="text-xs font-semibold text-[#F7F5F0]">

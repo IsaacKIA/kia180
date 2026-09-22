@@ -37,6 +37,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Prevent iOS bounce from revealing background */
+  overscroll-behavior: none;
+}
+
+/* Safe area insets for notched iPhones (home indicator) */
+.mobile-nav-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Custom Executive Utilities */

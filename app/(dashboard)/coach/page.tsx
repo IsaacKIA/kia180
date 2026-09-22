@@ -237,7 +237,7 @@ What do you need to solve right now?`,
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-h-[800px]">
+    <div className="flex flex-col h-[calc(100dvh-14rem)] sm:h-[calc(100vh-10rem)] max-h-[800px]">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#1C1C28] shrink-0">
         <div className="flex items-center gap-3">

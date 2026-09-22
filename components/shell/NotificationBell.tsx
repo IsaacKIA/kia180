@@ -58,7 +58,7 @@ export function NotificationBell() {
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-[#2B2B3C] bg-[#121217] shadow-2xl z-50 p-4 animate-in fade-in zoom-in-95">
+          <div className="absolute right-0 mt-2 w-[calc(100vw-1.5rem)] sm:w-96 max-w-sm rounded-xl border border-[#2B2B3C] bg-[#121217] shadow-2xl z-50 p-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-[#232330]">
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-semibold text-[#F7F5F0]">Executive Radar</h4>

@@ -119,7 +119,7 @@ export function TaskCard({
 
             {/* Direct Next Action Pill */}
             {task.next_action && !isDone && (
-              <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#181824] border border-[#262638] text-[11px] text-[#DFBF65]">
+              <div className="mt-2.5 inline-flex flex-wrap max-w-full break-words items-center gap-1.5 px-2.5 py-1 rounded bg-[#181824] border border-[#262638] text-[11px] text-[#DFBF65]">
                 <span className="text-[#8A8882]">Immediate action:</span>
                 <span className="font-medium">{task.next_action}</span>
               </div>

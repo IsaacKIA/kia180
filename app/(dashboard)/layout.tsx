@@ -2,6 +2,7 @@ import React from 'react';
 import { AppSidebar } from '@/components/shell/AppSidebar';
 import { TopBar } from '@/components/shell/TopBar';
 import { MobileNav } from '@/components/shell/MobileNav';
+import { MobileDrawer } from '@/components/shell/MobileDrawer';
 
 export default function DashboardLayout({
   children,
@@ -20,6 +21,9 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+
+      {/* Slide-out Navigation Drawer for Mobile */}
+      <MobileDrawer />
 
       {/* Fixed Bottom Bar for Mobile */}
       <MobileNav />

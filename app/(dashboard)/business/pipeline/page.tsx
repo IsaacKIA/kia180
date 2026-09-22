@@ -208,8 +208,8 @@ export default function SalesPipelinePage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#1C1C28] pb-3">
-        <span className="text-xs text-[#8A8882] flex items-center gap-1">
+      <div className="flex items-center gap-2 border-b border-[#1C1C28] pb-3 overflow-x-auto">
+        <span className="text-xs text-[#8A8882] flex items-center gap-1 shrink-0">
           <Filter className="h-3.5 w-3.5" /> Venture:
         </span>
         {(['all', 'kia', 'civitas', 'agrivora'] as const).map((b) => (

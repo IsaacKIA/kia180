@@ -83,7 +83,7 @@ export default function SettingsPage() {
               <Badge variant="gold" className="text-[10px] px-2 py-0 mt-1">Lead Strategist</Badge>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-[#A3A099]">Full Name</label>
               <Input defaultValue="Isaac Agya Koomson" className="mt-1 text-xs" />

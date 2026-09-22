@@ -189,7 +189,7 @@ export default function PlanPage() {
           </div>
 
           {/* Phase Timeline */}
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2">
             {[
               { name: 'Phase 1', range: 'Sep–Nov', focus: 'Foundation & Cash', active: true },
               { name: 'Phase 2', range: 'Nov–Jan', focus: 'Systems & Scale', active: false },
@@ -197,7 +197,7 @@ export default function PlanPage() {
             ].map((phase) => (
               <div
                 key={phase.name}
-                className={`p-2.5 rounded-lg border text-center ${
+                className={`p-2 sm:p-2.5 rounded-lg border text-center ${
                   phase.active
                     ? 'border-[#C9A84C]/50 bg-[#C9A84C]/10'
                     : 'border-[#232330] bg-[#0E0E14]'
@@ -206,8 +206,8 @@ export default function PlanPage() {
                 <div className={`text-[10px] font-bold ${phase.active ? 'text-[#DFBF65]' : 'text-[#8A8882]'}`}>
                   {phase.name}
                 </div>
-                <div className="text-[10px] text-[#6E6C66]">{phase.range}</div>
-                <div className={`text-[10px] font-medium mt-0.5 ${phase.active ? 'text-[#F7F5F0]' : 'text-[#6E6C66]'}`}>
+                <div className="text-[9px] sm:text-[10px] text-[#6E6C66]">{phase.range}</div>
+                <div className={`text-[9px] sm:text-[10px] font-medium mt-0.5 leading-tight ${phase.active ? 'text-[#F7F5F0]' : 'text-[#6E6C66]'}`}>
                   {phase.focus}
                 </div>
               </div>
