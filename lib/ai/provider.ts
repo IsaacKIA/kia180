@@ -65,33 +65,34 @@ class StubProvider implements AIProvider {
  * Falls back to StubProvider if no key is set.
  */
 export function getAIProvider(): AIProvider {
+  // If dedicated GEMINI_API_KEY or KIA_GEMINI_API_KEY is provided, prioritize it with Gemini model defaults
+  const geminiKey = process.env.KIA_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    const baseUrl = process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai';
+    const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+    return new OpenAICompatibleProvider(geminiKey, baseUrl, model);
+  }
+
+  // Auto-detect Groq if Groq key is present
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey || process.env.AI_PROVIDER_API_KEY?.startsWith('gsk_')) {
+    const key = groqKey || process.env.AI_PROVIDER_API_KEY!;
+    const baseUrl = process.env.AI_PROVIDER_BASE_URL || 'https://api.groq.com/openai/v1';
+    const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+    return new OpenAICompatibleProvider(key, baseUrl, model);
+  }
+
   const apiKey =
     process.env.AI_PROVIDER_API_KEY ||
     process.env.AI_API_KEY ||
-    process.env.OPENAI_API_KEY ||
-    process.env.GROQ_API_KEY ||
-    process.env.GEMINI_API_KEY;
-
-  let baseUrl = process.env.AI_PROVIDER_BASE_URL;
-  let model = process.env.AI_PROVIDER_MODEL || process.env.AI_MODEL || 'gpt-4o';
-
-  // Auto-detect Groq if a Groq key or gsk_ prefix is provided
-  if (!baseUrl && (process.env.GROQ_API_KEY || apiKey?.startsWith('gsk_'))) {
-    baseUrl = 'https://api.groq.com/openai/v1';
-    model = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
-  }
-
-  // Auto-detect Gemini OpenAI compatibility endpoint if AI_PROVIDER is gemini
-  if (!baseUrl && (process.env.AI_PROVIDER === 'gemini' || process.env.GEMINI_API_KEY)) {
-    baseUrl = 'https://generativelanguage.googleapis.com/v1beta/openai';
-    model = process.env.AI_MODEL || 'gemini-1.5-flash';
-  }
-
-  baseUrl = baseUrl ?? 'https://api.openai.com/v1';
+    process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return new StubProvider();
   }
+
+  const baseUrl = process.env.AI_PROVIDER_BASE_URL || 'https://api.openai.com/v1';
+  const model = process.env.AI_PROVIDER_MODEL || process.env.AI_MODEL || 'gpt-4o';
 
   return new OpenAICompatibleProvider(apiKey, baseUrl, model);
 }

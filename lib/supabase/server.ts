@@ -12,7 +12,9 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhYmMiOiJkZWZhdWx0In0=',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      'eyJhYmMiOiJkZWZhdWx0In0=',
     {
       cookies: {
         getAll() {
