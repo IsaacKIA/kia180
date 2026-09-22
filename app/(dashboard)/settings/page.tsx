@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { User, Bell, Shield, Link2, Database, Check } from 'lucide-react';
+import { User, Bell, Shield, Link2, Database, Check, Download, Trash2 } from 'lucide-react';
 
 interface NotificationSetting {
   id: string;
@@ -51,6 +51,63 @@ export default function SettingsPage() {
   const handleSaveProfile = () => {
     setSavedProfile(true);
     setTimeout(() => setSavedProfile(false), 2500);
+  };
+
+  const handleExportData = () => {
+    try {
+      const KIA_KEYS = [
+        'kia180_risks',
+        'kia180_transactions',
+        'kia180_obligations',
+        'kia180_knowledge',
+        'kia180_ideas_knowledge',
+        'kia180_goals',
+        'kia180_leads',
+        'kia180_notification_settings',
+      ];
+      const exportData: Record<string, unknown> = {
+        exported_at: new Date().toISOString(),
+        app: 'KIA 180 — Cycle 1',
+      };
+      KIA_KEYS.forEach((key) => {
+        try {
+          const val = localStorage.getItem(key);
+          if (val) exportData[key] = JSON.parse(val);
+        } catch {}
+      });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kia180-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Export failed. Please try again.');
+    }
+  };
+
+  const handleResetData = () => {
+    const confirmed = window.confirm(
+      '⚠️ Reset all KIA 180 data?\n\nThis will permanently delete your logged risks, transactions, goals, leads, knowledge, and ideas. This cannot be undone.\n\nType OK to confirm.'
+    );
+    if (!confirmed) return;
+    const KIA_KEYS = [
+      'kia180_risks',
+      'kia180_transactions',
+      'kia180_obligations',
+      'kia180_knowledge',
+      'kia180_ideas_knowledge',
+      'kia180_goals',
+      'kia180_leads',
+      'kia180_notification_settings',
+    ];
+    KIA_KEYS.forEach((key) => {
+      try { localStorage.removeItem(key); } catch {}
+    });
+    window.location.reload();
   };
 
   return (
@@ -223,10 +280,22 @@ export default function SettingsPage() {
         <CardContent className="space-y-2">
           <p className="text-xs text-red-200/70">Export or reset your KIA 180 data. These actions are permanent.</p>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="text-xs border-[#262634] text-[#A3A099]">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportData}
+              className="text-xs border-[#262634] text-[#A3A099] gap-1.5 hover:text-[#F7F5F0] hover:border-[#38384C]"
+            >
+              <Download className="h-3.5 w-3.5" />
               Export All Data (JSON)
             </Button>
-            <Button variant="destructive" size="sm" className="text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetData}
+              className="text-xs border-red-900/50 text-red-400 gap-1.5 hover:bg-red-950/40 hover:border-red-700"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
               Reset Cycle Data
             </Button>
           </div>

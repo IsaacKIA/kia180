@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
   Target,
   ChevronRight,
@@ -19,10 +26,34 @@ import {
   PlusCircle,
   ArrowUpRight,
   Flame,
+  Plus,
 } from 'lucide-react';
 
+interface GoalChild {
+  id: string;
+  level: 'monthly' | 'weekly';
+  title: string;
+  current: number;
+  target: number;
+  unit: string;
+  status: string;
+}
+
+interface Goal {
+  id: string;
+  level: '180day' | 'monthly' | 'weekly';
+  pillar: 'money' | 'build' | 'grow';
+  title: string;
+  current: number;
+  target: number;
+  unit: string;
+  status: string;
+  end_date: string;
+  children: GoalChild[];
+}
+
 // Static data based on Isaac's baseline
-const goals = [
+const DEFAULT_GOALS: Goal[] = [
   {
     id: 'g1',
     level: '180day' as const,
@@ -138,6 +169,55 @@ const statusBadge: Record<string, 'gold' | 'high' | 'medium' | 'default'> = {
 
 export default function PlanPage() {
   const [activeTab, setActiveTab] = useState('goals');
+  const [goals, setGoals] = useState<Goal[]>(DEFAULT_GOALS);
+  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+
+  // Goal Form State
+  const [goalTitle, setGoalTitle] = useState('');
+  const [goalPillar, setGoalPillar] = useState<Goal['pillar']>('money');
+  const [goalLevel, setGoalLevel] = useState<Goal['level']>('180day');
+  const [goalCurrent, setGoalCurrent] = useState('');
+  const [goalTarget, setGoalTarget] = useState('');
+  const [goalUnit, setGoalUnit] = useState('GHS');
+  const [goalEndDate, setGoalEndDate] = useState('2027-03-20');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kia180_goals');
+      if (saved) setGoals(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const saveGoals = (data: Goal[]) => {
+    setGoals(data);
+    try {
+      localStorage.setItem('kia180_goals', JSON.stringify(data));
+    } catch {}
+  };
+
+  const handleAddGoal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!goalTitle.trim() || !goalTarget) return;
+
+    const newGoal: Goal = {
+      id: `g-${Date.now()}`,
+      title: goalTitle.trim(),
+      pillar: goalPillar,
+      level: goalLevel,
+      current: parseFloat(goalCurrent) || 0,
+      target: parseFloat(goalTarget) || 100,
+      unit: goalUnit || 'units',
+      status: 'in_progress',
+      end_date: goalEndDate || '2027-03-20',
+      children: [],
+    };
+
+    saveGoals([...goals, newGoal]);
+    setGoalTitle('');
+    setGoalCurrent('');
+    setGoalTarget('');
+    setIsAddGoalOpen(false);
+  };
 
   const cycleStart = new Date('2026-09-21');
   const cycleEnd = new Date('2027-03-20');
@@ -160,7 +240,11 @@ export default function PlanPage() {
           </h1>
           <p className="text-xs text-[#A3A099] mt-0.5">Goals → Projects → Tasks → Daily Leverage</p>
         </div>
-        <Button size="sm" className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold text-xs gap-1.5">
+        <Button
+          size="sm"
+          onClick={() => setIsAddGoalOpen(true)}
+          className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold text-xs gap-1.5"
+        >
           <PlusCircle className="h-3.5 w-3.5" /> Add Goal
         </Button>
       </div>
@@ -407,6 +491,111 @@ export default function PlanPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Add Goal Dialog */}
+      <Dialog open={isAddGoalOpen} onOpenChange={setIsAddGoalOpen}>
+        <DialogContent className="max-w-md bg-[#121217] border-[#2B2B3C]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[#F7F5F0]">
+              <Target className="h-4 w-4 text-[#DFBF65]" /> Add Execution Goal
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddGoal} className="space-y-3 pt-2">
+            <div>
+              <label className="text-xs text-[#A3A099] font-medium">Goal Statement</label>
+              <Input
+                value={goalTitle}
+                onChange={(e) => setGoalTitle(e.target.value)}
+                placeholder="e.g. Personal Monthly Income: GHS 20,000"
+                className="mt-1"
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Pillar</label>
+                <select
+                  value={goalPillar}
+                  onChange={(e) => setGoalPillar(e.target.value as Goal['pillar'])}
+                  className="w-full mt-1 p-2 rounded-md border border-[#2B2B3C] bg-[#0E0E14] text-xs text-[#F7F5F0]"
+                >
+                  <option value="money">Money (Revenue/Cash)</option>
+                  <option value="build">Build (Ventures)</option>
+                  <option value="grow">Grow (Discipline)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Time Horizon</label>
+                <select
+                  value={goalLevel}
+                  onChange={(e) => setGoalLevel(e.target.value as Goal['level'])}
+                  className="w-full mt-1 p-2 rounded-md border border-[#2B2B3C] bg-[#0E0E14] text-xs text-[#F7F5F0]"
+                >
+                  <option value="180day">180-Day Primary Goal</option>
+                  <option value="monthly">Monthly Milestone</option>
+                  <option value="weekly">Weekly Target</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Current</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={goalCurrent}
+                  onChange={(e) => setGoalCurrent(e.target.value)}
+                  placeholder="0"
+                  className="mt-1 font-mono font-medium text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Target</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={goalTarget}
+                  onChange={(e) => setGoalTarget(e.target.value)}
+                  placeholder="15000"
+                  className="mt-1 font-mono font-medium text-xs"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Unit</label>
+                <Input
+                  value={goalUnit}
+                  onChange={(e) => setGoalUnit(e.target.value)}
+                  placeholder="GHS/mo"
+                  className="mt-1 text-xs"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-[#A3A099] font-medium">Target Date</label>
+              <Input
+                type="date"
+                value={goalEndDate}
+                onChange={(e) => setGoalEndDate(e.target.value)}
+                className="mt-1 text-xs"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsAddGoalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold">
+                Save to 180 Plan
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

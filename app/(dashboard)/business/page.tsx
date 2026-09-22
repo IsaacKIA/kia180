@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
   Briefcase,
   TrendingUp,
@@ -96,18 +103,57 @@ const roleLabel: Record<string, string> = {
 export default function BusinessPage() {
   const [activeTab, setActiveTab] = useState('ventures');
   const [leads, setLeads] = useState(initialLeads);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [newContact, setNewContact] = useState('');
+  const [newService, setNewService] = useState('');
+  const [newValue, setNewValue] = useState('');
+  const [newBusiness, setNewBusiness] = useState('kia');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kia180_leads');
+      if (saved) setLeads(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const saveLeads = (data: typeof initialLeads) => {
+    setLeads(data);
+    try {
+      localStorage.setItem('kia180_leads', JSON.stringify(data));
+    } catch {}
+  };
 
   const advanceLead = (id: string) => {
-    setLeads((prev) =>
-      prev.map((l) => {
-        if (l.id !== id) return l;
-        const stageIdx = LEAD_STAGES.indexOf(l.stage);
-        if (stageIdx < LEAD_STAGES.length - 1) {
-          return { ...l, stage: LEAD_STAGES[stageIdx + 1] };
-        }
-        return l;
-      })
-    );
+    const updated = leads.map((l) => {
+      if (l.id !== id) return l;
+      const stageIdx = LEAD_STAGES.indexOf(l.stage);
+      if (stageIdx < LEAD_STAGES.length - 1) {
+        return { ...l, stage: LEAD_STAGES[stageIdx + 1] };
+      }
+      return l;
+    });
+    saveLeads(updated);
+  };
+
+  const handleAddLead = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newContact.trim() || !newValue) return;
+
+    const newLead = {
+      id: `l-${Date.now()}`,
+      contact: newContact.trim(),
+      service: newService.trim() || 'Advisory Package',
+      business: newBusiness,
+      value: parseFloat(newValue) || 0,
+      stage: 'lead',
+      days: 0,
+    };
+
+    saveLeads([newLead, ...leads]);
+    setNewContact('');
+    setNewService('');
+    setNewValue('');
+    setIsAddLeadOpen(false);
   };
 
   return (
@@ -227,7 +273,11 @@ export default function BusinessPage() {
                 <h3 className="text-sm font-semibold text-[#F7F5F0]">Sales Pipeline — KIA Consult</h3>
                 <p className="text-xs text-[#8A8882]">9-stage conversion funnel</p>
               </div>
-              <Button size="sm" className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold text-xs gap-1.5">
+              <Button
+                size="sm"
+                onClick={() => setIsAddLeadOpen(true)}
+                className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold text-xs gap-1.5"
+              >
                 <Plus className="h-3.5 w-3.5" /> Add Lead
               </Button>
             </div>
@@ -300,6 +350,77 @@ export default function BusinessPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Add Lead Dialog */}
+      <Dialog open={isAddLeadOpen} onOpenChange={setIsAddLeadOpen}>
+        <DialogContent className="max-w-md bg-[#121217] border-[#2B2B3C]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[#F7F5F0]">
+              <Users className="h-4 w-4 text-[#C9A84C]" /> Add New Prospect / Lead
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddLead} className="space-y-3 pt-2">
+            <div>
+              <label className="text-xs text-[#A3A099] font-medium">Contact / Founder Name</label>
+              <Input
+                value={newContact}
+                onChange={(e) => setNewContact(e.target.value)}
+                placeholder="e.g. Samuel Darko"
+                className="mt-1"
+                required
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-[#A3A099] font-medium">Service / Advisory Scope</label>
+              <Input
+                value={newService}
+                onChange={(e) => setNewService(e.target.value)}
+                placeholder="e.g. Monthly Startup CFO Advisory Retainer"
+                className="mt-1"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Estimated Value (GHS)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newValue}
+                  onChange={(e) => setNewValue(e.target.value)}
+                  placeholder="3000"
+                  className="mt-1 font-mono font-medium"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[#A3A099] font-medium">Venture</label>
+                <select
+                  value={newBusiness}
+                  onChange={(e) => setNewBusiness(e.target.value)}
+                  className="w-full mt-1 p-2 rounded-md border border-[#2B2B3C] bg-[#0E0E14] text-xs text-[#F7F5F0]"
+                >
+                  <option value="kia">KIA Consult</option>
+                  <option value="civitas">Civitas</option>
+                  <option value="agrivora">Agrivora</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsAddLeadOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] font-semibold">
+                Add to Pipeline
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
