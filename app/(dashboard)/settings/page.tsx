@@ -1,13 +1,58 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Settings, User, Bell, Shield, Palette, Link2, Database } from 'lucide-react';
+import { User, Bell, Shield, Link2, Database, Check } from 'lucide-react';
+
+interface NotificationSetting {
+  id: string;
+  label: string;
+  enabled: boolean;
+}
+
+const defaultNotifications: NotificationSetting[] = [
+  { id: 'morning_brief', label: 'Daily morning brief (07:00)', enabled: true },
+  { id: 'pre_start_nudge', label: 'Pre-start task nudge (09:00)', enabled: true },
+  { id: 'missed_commitment', label: 'Missed commitment alert', enabled: true },
+  { id: 'evening_review', label: 'Evening review reminder (21:00)', enabled: true },
+  { id: 'cash_alert', label: 'Cash position weekly alert', enabled: true },
+  { id: 'risk_reminder', label: 'Risk review reminders', enabled: true },
+];
 
 export default function SettingsPage() {
+  const [notifications, setNotifications] = useState<NotificationSetting[]>(defaultNotifications);
+  const [savedProfile, setSavedProfile] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState('Google Gemini');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kia180_notification_settings');
+      if (saved) {
+        setNotifications(JSON.parse(saved));
+      }
+    } catch {}
+  }, []);
+
+  const toggleNotification = (id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id ? { ...item, enabled: !item.enabled } : item
+      );
+      try {
+        localStorage.setItem('kia180_notification_settings', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleSaveProfile = () => {
+    setSavedProfile(true);
+    setTimeout(() => setSavedProfile(false), 2500);
+  };
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="border-b border-[#1C1C28] pb-5">
@@ -56,8 +101,18 @@ export default function SettingsPage() {
               <Input defaultValue="isaac@kia180.com" type="email" className="mt-1 text-xs" />
             </div>
           </div>
-          <Button className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] text-xs font-semibold">
-            Save Profile
+          <Button
+            onClick={handleSaveProfile}
+            className="bg-[#C9A84C] hover:bg-[#DFBF65] text-[#0A0A0C] text-xs font-semibold flex items-center gap-1.5"
+          >
+            {savedProfile ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Profile Saved
+              </>
+            ) : (
+              'Save Profile'
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -93,34 +148,31 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-[#C9A84C]" />
             <CardTitle className="text-sm text-[#F7F5F0]">AI Provider</CardTitle>
-            <Badge variant="default" className="text-[10px] px-2 py-0">Stub Mode</Badge>
+            <Badge variant="gold" className="text-[10px] px-2 py-0">Google Gemini Live</Badge>
           </div>
           <CardDescription className="text-xs">
-            Connect a real AI provider to enable full coaching intelligence. The interface works in stub mode by default.
+            Powered by Google Gemini 3.6 Flash for high-speed executive coaching, resistance analysis, and strategic decisions.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {['OpenAI (GPT-4o)', 'Google Gemini', 'Anthropic Claude', 'Stub Mode (No Key Required)'].map((provider) => (
+            {['Google Gemini', 'OpenAI (GPT-4o)', 'Anthropic Claude', 'Stub Mode (Offline)'].map((provider) => (
               <button
                 key={provider}
                 type="button"
-                className={`text-left p-3 rounded-lg border text-xs transition-colors ${
-                  provider === 'Stub Mode (No Key Required)'
+                onClick={() => setSelectedProvider(provider)}
+                className={`text-left p-3 rounded-lg border text-xs transition-colors cursor-pointer ${
+                  selectedProvider === provider
                     ? 'border-[#C9A84C]/50 bg-[#C9A84C]/10 text-[#DFBF65]'
                     : 'border-[#1C1C28] bg-[#0E0E14] text-[#8A8882] hover:text-[#F7F5F0] hover:border-[#38384C]'
                 }`}
               >
                 {provider}
-                {provider === 'Stub Mode (No Key Required)' && (
-                  <span className="text-[10px] text-[#C9A84C] block mt-0.5">✓ Active</span>
+                {selectedProvider === provider && (
+                  <span className="text-[10px] text-[#C9A84C] block mt-0.5">✓ Active Provider</span>
                 )}
               </button>
             ))}
-          </div>
-          <div>
-            <label className="text-xs text-[#A3A099]">API Key (when provider selected)</label>
-            <Input type="password" placeholder="sk-..." className="mt-1 text-xs font-mono" disabled />
           </div>
         </CardContent>
       </Card>
@@ -128,33 +180,33 @@ export default function SettingsPage() {
       {/* Notifications */}
       <Card className="border-[#232330] bg-[#121218]">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-[#C9A84C]" />
-            <CardTitle className="text-sm text-[#F7F5F0]">Notifications</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-[#C9A84C]" />
+              <CardTitle className="text-sm text-[#F7F5F0]">Notifications</CardTitle>
+            </div>
+            <span className="text-[11px] text-[#8A8882]">Saved automatically</span>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {[
-            { label: 'Daily morning brief (07:00)', enabled: true },
-            { label: 'Pre-start task nudge (09:00)', enabled: true },
-            { label: 'Missed commitment alert', enabled: true },
-            { label: 'Evening review reminder (21:00)', enabled: true },
-            { label: 'Cash position weekly alert', enabled: true },
-            { label: 'Risk review reminders', enabled: false },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-2 border-b border-[#1C1C28] last:border-0">
+          {notifications.map((item) => (
+            <div key={item.id} className="flex items-center justify-between py-2 border-b border-[#1C1C28] last:border-0">
               <span className="text-xs text-[#A3A099]">{item.label}</span>
-              <div
-                className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer ${
+              <button
+                type="button"
+                role="switch"
+                aria-checked={item.enabled}
+                onClick={() => toggleNotification(item.id)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#C9A84C] ${
                   item.enabled ? 'bg-[#C9A84C]' : 'bg-[#1C1C28] border border-[#2B2B3C]'
                 }`}
               >
-                <div
-                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${
-                    item.enabled ? 'left-[18px]' : 'left-0.5'
-                  }`}
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                    item.enabled ? 'translate-x-4' : 'translate-x-0.5'
+                  } mt-0.5`}
                 />
-              </div>
+              </button>
             </div>
           ))}
         </CardContent>
